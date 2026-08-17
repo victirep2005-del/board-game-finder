@@ -24,7 +24,7 @@ const allGamesQueryOptions = queryOptions({
   queryFn: () => searchGames({ data: { query: "" } }),
 });
 
-export const Route = createFileRoute("/catalogo")({
+export const Route = createFileRoute("/catalogo/")({
   head: () => ({
     meta: [
       { title: "Catálogo — BoardGameFinder" },
