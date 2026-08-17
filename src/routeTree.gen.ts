@@ -10,33 +10,97 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CatalogoRouteImport } from './routes/catalogo'
+import { Route as UbicacionesRouteImport } from './routes/ubicaciones'
+import { Route as CatalogoIndexRouteImport } from './routes/catalogo.index'
+import { Route as CatalogoNuevoRouteImport } from './routes/catalogo.nuevo'
+import { Route as CatalogoIdEditarRouteImport } from './routes/catalogo.$id.editar'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CatalogoRoute = CatalogoRouteImport.update({
+  id: '/catalogo',
+  path: '/catalogo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UbicacionesRoute = UbicacionesRouteImport.update({
+  id: '/ubicaciones',
+  path: '/ubicaciones',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CatalogoIndexRoute = CatalogoIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CatalogoRoute,
+} as any)
+const CatalogoNuevoRoute = CatalogoNuevoRouteImport.update({
+  id: '/nuevo',
+  path: '/nuevo',
+  getParentRoute: () => CatalogoRoute,
+} as any)
+const CatalogoIdEditarRoute = CatalogoIdEditarRouteImport.update({
+  id: '/$id/editar',
+  path: '/$id/editar',
+  getParentRoute: () => CatalogoRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/catalogo': typeof CatalogoRouteWithChildren
+  '/ubicaciones': typeof UbicacionesRoute
+  '/catalogo/nuevo': typeof CatalogoNuevoRoute
+  '/catalogo/': typeof CatalogoIndexRoute
+  '/catalogo/$id/editar': typeof CatalogoIdEditarRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/ubicaciones': typeof UbicacionesRoute
+  '/catalogo/nuevo': typeof CatalogoNuevoRoute
+  '/catalogo': typeof CatalogoIndexRoute
+  '/catalogo/$id/editar': typeof CatalogoIdEditarRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/catalogo': typeof CatalogoRouteWithChildren
+  '/ubicaciones': typeof UbicacionesRoute
+  '/catalogo/nuevo': typeof CatalogoNuevoRoute
+  '/catalogo/': typeof CatalogoIndexRoute
+  '/catalogo/$id/editar': typeof CatalogoIdEditarRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/catalogo'
+    | '/ubicaciones'
+    | '/catalogo/nuevo'
+    | '/catalogo/'
+    | '/catalogo/$id/editar'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/ubicaciones'
+    | '/catalogo/nuevo'
+    | '/catalogo'
+    | '/catalogo/$id/editar'
+  id:
+    | '__root__'
+    | '/'
+    | '/catalogo'
+    | '/ubicaciones'
+    | '/catalogo/nuevo'
+    | '/catalogo/'
+    | '/catalogo/$id/editar'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CatalogoRoute: typeof CatalogoRouteWithChildren
+  UbicacionesRoute: typeof UbicacionesRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +112,64 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/catalogo': {
+      id: '/catalogo'
+      path: '/catalogo'
+      fullPath: '/catalogo'
+      preLoaderRoute: typeof CatalogoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ubicaciones': {
+      id: '/ubicaciones'
+      path: '/ubicaciones'
+      fullPath: '/ubicaciones'
+      preLoaderRoute: typeof UbicacionesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/catalogo/': {
+      id: '/catalogo/'
+      path: '/'
+      fullPath: '/catalogo/'
+      preLoaderRoute: typeof CatalogoIndexRouteImport
+      parentRoute: typeof CatalogoRoute
+    }
+    '/catalogo/nuevo': {
+      id: '/catalogo/nuevo'
+      path: '/nuevo'
+      fullPath: '/catalogo/nuevo'
+      preLoaderRoute: typeof CatalogoNuevoRouteImport
+      parentRoute: typeof CatalogoRoute
+    }
+    '/catalogo/$id/editar': {
+      id: '/catalogo/$id/editar'
+      path: '/$id/editar'
+      fullPath: '/catalogo/$id/editar'
+      preLoaderRoute: typeof CatalogoIdEditarRouteImport
+      parentRoute: typeof CatalogoRoute
+    }
   }
 }
 
+interface CatalogoRouteChildren {
+  CatalogoNuevoRoute: typeof CatalogoNuevoRoute
+  CatalogoIndexRoute: typeof CatalogoIndexRoute
+  CatalogoIdEditarRoute: typeof CatalogoIdEditarRoute
+}
+
+const CatalogoRouteChildren: CatalogoRouteChildren = {
+  CatalogoNuevoRoute: CatalogoNuevoRoute,
+  CatalogoIndexRoute: CatalogoIndexRoute,
+  CatalogoIdEditarRoute: CatalogoIdEditarRoute,
+}
+
+const CatalogoRouteWithChildren = CatalogoRoute._addFileChildren(
+  CatalogoRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CatalogoRoute: CatalogoRouteWithChildren,
+  UbicacionesRoute: UbicacionesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
