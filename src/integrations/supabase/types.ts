@@ -5,9 +5,9 @@ export type Database = {
   public: {
     Tables: {
       board_games: {
-        Row: { created_at: string; difficulty: string; duration_minutes: number | null; id: string; max_players: number | null; min_age: number | null; min_players: number | null; name: string; notes: string | null; image_url: string | null; shelf_id: string; updated_at: string }
-        Insert: { created_at?: string; difficulty?: string; duration_minutes?: number | null; id?: string; max_players?: number | null; min_age?: number | null; min_players?: number | null; name: string; notes?: string | null; image_url?: string | null; shelf_id: string; updated_at?: string }
-        Update: { created_at?: string; difficulty?: string; duration_minutes?: number | null; id?: string; max_players?: number | null; min_age?: number | null; min_players?: number | null; name?: string; notes?: string | null; image_url?: string | null; shelf_id?: string; updated_at?: string }
+        Row: { created_at: string; difficulty: string; duration_minutes: number | null; id: string; max_players: number | null; min_age: number | null; min_players: number | null; name: string; category: string | null; notes: string | null; image_url: string | null; shelf_id: string; updated_at: string }
+        Insert: { created_at?: string; difficulty?: string; duration_minutes?: number | null; id?: string; max_players?: number | null; min_age?: number | null; min_players?: number | null; name: string; category?: string | null; notes?: string | null; image_url?: string | null; shelf_id: string; updated_at?: string }
+        Update: { created_at?: string; difficulty?: string; duration_minutes?: number | null; id?: string; max_players?: number | null; min_age?: number | null; min_players?: number | null; name?: string; category?: string | null; notes?: string | null; image_url?: string | null; shelf_id?: string; updated_at?: string }
         Relationships: [{ foreignKeyName: "board_games_shelf_id_fkey"; columns: ["shelf_id"]; isOneToOne: false; referencedRelation: "shelves"; referencedColumns: ["id"] }]
       }
       rooms: {
@@ -19,7 +19,7 @@ export type Database = {
       shelves: {
         Row: { created_at: string; id: string; name: string; room_id: string; sort_order: number }
         Insert: { created_at?: string; id?: string; name: string; room_id: string; sort_order?: number }
-        Update: { created_at?: string; id?: string; name?: string; room_id?: string; sort_order?: number }
+        Update: { created_at?: string; id?: string; name?: string; room_id?: string; name?: string; sort_order?: number }
         Relationships: [{ foreignKeyName: "shelves_room_id_fkey"; columns: ["room_id"]; isOneToOne: false; referencedRelation: "rooms"; referencedColumns: ["id"] }]
       }
     }
