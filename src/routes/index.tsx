@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { queryOptions, useQuery, keepPreviousData } from "@tanstack/react-query";import { useState } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { GameCard } from "@/components/game-card";
@@ -36,8 +35,8 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
   const [query, setQuery] = useState("");
-  const { data: games } = useSuspenseQuery(searchGamesQueryOptions(query));
-
+  const { data: games = [] } = useQuery({ ...searchGamesQueryOptions(query), placeholderData: keepPreviousData, });
+  
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:py-12">
       <div className="text-center">
