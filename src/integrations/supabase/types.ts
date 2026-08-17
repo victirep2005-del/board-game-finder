@@ -19,7 +19,7 @@ export type Database = {
       shelves: {
         Row: { created_at: string; id: string; name: string; room_id: string; sort_order: number }
         Insert: { created_at?: string; id?: string; name: string; room_id: string; sort_order?: number }
-        Update: { created_at?: string; id?: string; name?: string; room_id?: string; name?: string; sort_order?: number }
+        Update: { created_at?: string; id?: string; name?: string; room_id?: string; sort_order?: number }
         Relationships: [{ foreignKeyName: "shelves_room_id_fkey"; columns: ["room_id"]; isOneToOne: false; referencedRelation: "rooms"; referencedColumns: ["id"] }]
       }
     }
