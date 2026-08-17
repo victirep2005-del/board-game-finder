@@ -1,21 +1,19 @@
-
 import { createFileRoute } from "@tanstack/react-router";
 import {
   queryOptions,
   useQuery,
   keepPreviousData,
 } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { GameCard } from "@/components/game-card";
 import { searchGames } from "@/lib/games.functions";
 
-const searchGamesQueryOptions = (query: string) =>
-  queryOptions({
-    queryKey: ["games", "search", query],
-    queryFn: () => searchGames({ data: { query } }),
-  });
+const allGamesQueryOptions = queryOptions({
+  queryKey: ["games", "all"],
+  queryFn: () => searchGames({ data: { query: "" } }),
+});
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -41,15 +39,12 @@ export const Route = createFileRoute("/")({
   }),
 
   loader: ({ context }) =>
-    context.queryClient.ensureQueryData(searchGamesQueryOptions("")),
+    context.queryClient.ensureQueryData(allGamesQueryOptions),
 
   component: HomePage,
 
   errorComponent: ({ error }) => (
-    <div
-      role="alert"
-      className="p-4 text-red-200"
-    >
+    <div role="alert" className="p-4 text-red-200">
       Error al cargar juegos: {error.message}
     </div>
   ),
@@ -64,14 +59,22 @@ export const Route = createFileRoute("/")({
 function HomePage() {
   const [query, setQuery] = useState("");
 
-  const { data: games = [] } = useQuery({
-    ...searchGamesQueryOptions(query),
+  const { data: allGames = [] } = useQuery({
+    ...allGamesQueryOptions,
     placeholderData: keepPreviousData,
   });
 
+  const normalizedQuery = query.trim().toLocaleLowerCase();
+  const games = useMemo(() => {
+    if (!normalizedQuery) return allGames;
+
+    return allGames.filter((game) =>
+      game.name.toLocaleLowerCase().includes(normalizedQuery),
+    );
+  }, [allGames, normalizedQuery]);
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:py-12">
-      {/* Encabezado */}
       <div className="text-center">
         <h1 className="text-3xl font-bold tracking-tight text-white drop-shadow-lg sm:text-4xl">
           Buscar Juego
@@ -82,7 +85,6 @@ function HomePage() {
         </p>
       </div>
 
-      {/* Buscador */}
       <div className="relative mt-8">
         <Search className="absolute left-3 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-white/75" />
 
@@ -96,7 +98,6 @@ function HomePage() {
         />
       </div>
 
-      {/* Resultados */}
       <div className="mt-6 space-y-3">
         {games.length === 0 ? (
           <div className="rounded-lg border border-white/30 bg-black/30 p-8 text-center backdrop-blur-sm">
