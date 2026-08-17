@@ -25,6 +25,7 @@ export const boardGameSchema = z.object({
   minAge: z.number().int().min(1).nullable(),
   difficulty: difficultySchema,
   notes: z.string().max(1000).nullable(),
+  imageUrl: z.string().url().nullable(),
 });
 
 export const boardGameWithLocationSchema = boardGameSchema.extend({
@@ -47,6 +48,7 @@ export const boardGameFormSchema = z.object({
   minAge: z.number().int().min(1).nullable().optional(),
   difficulty: difficultySchema,
   notes: z.string().max(1000).nullable().optional(),
+  imageUrl: z.string().url().nullable().optional(),
 });
 
 export const roomFormSchema = z.object({
