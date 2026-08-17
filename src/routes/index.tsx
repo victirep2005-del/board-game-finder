@@ -15,7 +15,7 @@ const searchGamesQueryOptions = (query: string) =>
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "BoardGameFinder — Buscar juego" },
+      { title: "TerraLudo" },
       { name: "description", content: "Busca un juego de mesa y descubre en qué cuarto y estante está." },
       { property: "og:title", content: "BoardGameFinder — Buscar juego" },
       { property: "og:description", content: "Busca un juego de mesa y descubre en qué cuarto y estante está." },
@@ -42,10 +42,10 @@ function HomePage() {
     <div className="mx-auto max-w-3xl px-4 py-8 sm:py-12">
       <div className="text-center">
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-          ¿Dónde está el juego?
+          Buscar Juego
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Escribe el nombre y te decimos cuarto y estante.
+          TerraLudo
         </p>
       </div>
 
