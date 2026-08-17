@@ -1,4 +1,25 @@
 import { createClient } from "@supabase/supabase-js";
+import { readFileSync, existsSync } from "node:fs";
+import { resolve } from "node:path";
+
+function loadEnvFile(filePath) {
+  if (!existsSync(filePath)) return;
+  const text = readFileSync(filePath, "utf8");
+  for (const line of text.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+    const match = trimmed.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/);
+    if (!match) continue;
+    const [, key, rawValue] = match;
+    if (process.env[key] !== undefined) continue;
+    let value = rawValue.trim();
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) value = value.slice(1, -1);
+    process.env[key] = value;
+  }
+}
+
+loadEnvFile(resolve(process.cwd(), ".env.local"));
+loadEnvFile(resolve(process.cwd(), ".env"));
 
 const SOURCE_URL = "https://teletype.in/@ramsesqh/Coleccion";
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
