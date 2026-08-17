@@ -140,7 +140,7 @@
 body {
   background-image:
     linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)),
-    url('/background.jpg');
+    url('/background.png');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
