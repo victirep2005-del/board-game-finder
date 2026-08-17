@@ -17,16 +17,6 @@ import { registerPWA } from "../lib/pwa-register";
 import { asyncStoragePersister } from "../lib/persister";
 import { OfflineIndicator } from "../components/offline-indicator";
 
-<div className="fixed inset-0 -z-10">
-  <div
-    className="absolute inset-0 bg-cover bg-center bg-fixed"
-    style={{ backgroundImage: "url('/background.jpg')" }}
-  />
-  <div className="absolute inset-0 bg-black/40" />
-</div>
-
-<Outlet />
-  
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -136,7 +126,7 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
-function RootComponent() {
+ffunction RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   useEffect(() => {
@@ -153,6 +143,17 @@ function RootComponent() {
       }}
     >
       <OfflineIndicator />
+
+      {/* Fondo */}
+      <div className="fixed inset-0 -z-10">
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-fixed"
+          style={{ backgroundImage: "url('/background.jpg')" }}
+        />
+        <div className="absolute inset-0 bg-black/40" />
+      </div>
+
+      {/* Contenido */}
       <div className="flex min-h-screen flex-col">
         <AppHeader />
         <main className="flex-1">
@@ -161,4 +162,5 @@ function RootComponent() {
       </div>
     </PersistQueryClientProvider>
   );
+}
 }
