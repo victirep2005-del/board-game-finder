@@ -139,7 +139,7 @@
 
 body {
   background-image:
-    linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)),
+    linear-gradient(rgba(0, 0, 0, 0.60), rgba(0, 0, 0, 0.60)),
     url('/background.png');
   background-size: cover;
   background-position: center;
