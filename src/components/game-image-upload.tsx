@@ -35,7 +35,7 @@ export function GameImageUpload({ gameId, value, onChange }: GameImageUploadProp
       const path = `${gameId}.${extension}`;
       const { error: uploadError } = await supabase.storage
         .from("board-game-images")
-        .upload(path, file, { upsert: true, contentType: file.type, cacheControl: "3600" });
+        .upload(path, file, { upsert: false, contentType: file.type, cacheControl: "3600" });
       if (uploadError) throw uploadError;
       const { data } = supabase.storage.from("board-game-images").getPublicUrl(path);
       const url = `${data.publicUrl}?v=${Date.now()}`;
