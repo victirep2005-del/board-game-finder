@@ -4,20 +4,16 @@ import { resolve } from "node:path";
 
 function loadEnvFile(filePath) {
   if (!existsSync(filePath)) return;
-  const text = readFileSync(filePath, "utf8");
-  for (const line of text.split(/\r?\n/)) {
+  for (const line of readFileSync(filePath, "utf8").split(/\r?\n/)) {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith("#")) continue;
     const match = trimmed.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/);
-    if (!match) continue;
-    const [, key, rawValue] = match;
-    if (process.env[key] !== undefined) continue;
-    let value = rawValue.trim();
+    if (!match || process.env[match[1]] !== undefined) continue;
+    let value = match[2].trim();
     if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) value = value.slice(1, -1);
-    process.env[key] = value;
+    process.env[match[1]] = value;
   }
 }
-
 loadEnvFile(resolve(process.cwd(), ".env.local"));
 loadEnvFile(resolve(process.cwd(), ".env"));
 
@@ -33,7 +29,7 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
 }
 
 function decodeEntities(value) {
-  return value.replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">\").replace(/&nbsp;/g, " ");
+  return value.replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&nbsp;/g, " ");
 }
 function cleanText(value) {
   return decodeEntities(value.replace(/<[^>]*>/g, " ")).replace(/\s+/g, " ").trim();
@@ -74,10 +70,10 @@ function parseCollection(html) {
     result.push({
       name: name.replace(/\s*~~\s*$/, "").trim(),
       category,
-      min_players: minPlayers || null,
-      max_players: maxPlayers || minPlayers || null,
-      duration_minutes: minutes(duration),
-      min_age: minAge || null,
+      minPlayers: minPlayers || null,
+      maxPlayers: maxPlayers || minPlayers || null,
+      durationMinutes: minutes(duration),
+      minAge: minAge || null,
       difficulty: difficulty(category),
     });
   }
@@ -87,11 +83,11 @@ function parseCollection(html) {
 const response = await fetch(SOURCE_URL, { headers: { "User-Agent": "Mozilla/5.0" } });
 if (!response.ok) throw new Error(`No se pudo descargar la colección (${response.status}).`);
 const allGames = parseCollection(await response.text());
-const expansions = allGames.filter((game) => game.name.trim().toLocaleLowerCase().startsWith("+expansión"));
-const games = allGames.filter((game) => !game.name.trim().toLocaleLowerCase().startsWith("+expansión"));
+const expansions = allGames.filter((game) => /^\+\s*expansi[oó]n\b/i.test(game.name));
+const games = allGames.filter((game) => !/^\+\s*expansi[oó]n\b/i.test(game.name));
 console.log(`\nColección encontrada: ${allGames.length} entradas.`);
 console.log(`Juegos normales: ${games.length}. Expansiones omitidas: ${expansions.length}.`);
-if (expansions.length) console.log(`Expansiones omitidas: ${expansions.map((game) => game.name).join(" | ")}`);
+if (expansions.length) console.log(`Expansiones omitidas: ${expansions.map((g) => g.name).join(" | ")}`);
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } });
 const { data: shelves, error: shelfError } = await supabase.from("shelves").select("id,name,rooms:room_id(name)").order("name");
@@ -102,20 +98,33 @@ for (const shelf of shelves ?? []) console.log(`  ${shelf.id}  ${shelf.name} —
 if (!SHELF_ID) {
   console.log("\nModo PREVISUALIZACIÓN. Para importar, define SHELF_ID con el estante elegido y añade --import.");
   console.log("Ejemplo: SHELF_ID='ID_DEL_ESTANTE' npm run import:legacy -- --import\n");
-  for (const [index, game] of games.entries()) console.log(`${index + 1}. ${game.name} | ${game.category} | ${game.min_players}-${game.max_players} | ${game.duration_minutes ?? "?"} min | ${game.min_age ?? "?"}+ | ${game.difficulty}`);
+  for (const [index, game] of games.entries()) console.log(`${index + 1}. ${game.name} | ${game.category} | ${game.minPlayers}-${game.maxPlayers} | ${game.durationMinutes ?? "?"} min | ${game.minAge ?? "?"}+ | ${game.difficulty}`);
   process.exit(0);
 }
 
 const { data: existing, error: existingError } = await supabase.from("board_games").select("name");
 if (existingError) throw existingError;
 const existingNames = new Set((existing ?? []).map((g) => String(g.name).trim().toLocaleLowerCase()));
-const toInsert = games.filter((g) => !existingNames.has(g.name.trim().toLocaleLowerCase())).map((g) => ({ ...g, shelf_id: SHELF_ID, notes: `Importado de la colección antigua · Categoría: ${g.category}`, image_url: null }));
+const toInsert = games.filter((g) => !existingNames.has(g.name.trim().toLocaleLowerCase())).map((g) => ({
+  name: g.name,
+  shelf_id: SHELF_ID,
+  min_players: g.minPlayers,
+  max_players: g.maxPlayers,
+  duration_minutes: g.durationMinutes,
+  min_age: g.minAge,
+  difficulty: g.difficulty,
+  notes: `Importado de la colección antigua · Categoría original: ${g.category}`,
+  image_url: null,
+}));
 console.log(`\nNuevos: ${toInsert.length}. Ya existentes/omitidos: ${games.length - toInsert.length}.`);
 if (!DO_IMPORT) {
   console.log("No se insertó nada. Añade --import para confirmar la importación.\n");
   process.exit(0);
 }
-if (!toInsert.length) { console.log("No hay juegos nuevos que importar."); process.exit(0); }
+if (!toInsert.length) {
+  console.log("No hay juegos nuevos que importar.");
+  process.exit(0);
+}
 const { error: insertError } = await supabase.from("board_games").insert(toInsert);
 if (insertError) throw insertError;
-console.log(`\nIMPORTACIÓN COMPLETADA: ${toInsert.length} juegos insertados.`);
+console.log(`\nIMPORTACIÓN COMPLETADA: ${toInsert.length} juegos insertados en A1.`);
