@@ -17,6 +17,16 @@ import { registerPWA } from "../lib/pwa-register";
 import { asyncStoragePersister } from "../lib/persister";
 import { OfflineIndicator } from "../components/offline-indicator";
 
+<div className="fixed inset-0 -z-10">
+  <div
+    className="absolute inset-0 bg-cover bg-center bg-fixed"
+    style={{ backgroundImage: "url('/background.jpg')" }}
+  />
+  <div className="absolute inset-0 bg-black/40" />
+</div>
+
+<Outlet />
+  
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
