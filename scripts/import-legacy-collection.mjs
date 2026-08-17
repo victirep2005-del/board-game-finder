@@ -33,7 +33,7 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
 }
 
 function decodeEntities(value) {
-  return value.replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&nbsp;/g, " ");
+  return value.replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">\").replace(/&nbsp;/g, " ");
 }
 function cleanText(value) {
   return decodeEntities(value.replace(/<[^>]*>/g, " ")).replace(/\s+/g, " ").trim();
@@ -86,8 +86,12 @@ function parseCollection(html) {
 
 const response = await fetch(SOURCE_URL, { headers: { "User-Agent": "Mozilla/5.0" } });
 if (!response.ok) throw new Error(`No se pudo descargar la colección (${response.status}).`);
-const games = parseCollection(await response.text());
-console.log(`\nColección encontrada: ${games.length} juegos.`);
+const allGames = parseCollection(await response.text());
+const expansions = allGames.filter((game) => game.name.trim().toLocaleLowerCase().startsWith("+expansión"));
+const games = allGames.filter((game) => !game.name.trim().toLocaleLowerCase().startsWith("+expansión"));
+console.log(`\nColección encontrada: ${allGames.length} entradas.`);
+console.log(`Juegos normales: ${games.length}. Expansiones omitidas: ${expansions.length}.`);
+if (expansions.length) console.log(`Expansiones omitidas: ${expansions.map((game) => game.name).join(" | ")}`);
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } });
 const { data: shelves, error: shelfError } = await supabase.from("shelves").select("id,name,rooms:room_id(name)").order("name");
