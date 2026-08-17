@@ -85,7 +85,7 @@ export const searchGames = createServerFn({ method: "GET" })
       .order("name", { ascending: true });
 
     if (q.length > 0) {
-      dbQuery = dbQuery.or(`name.ilike.%${q}%,notes.ilike.%${q}%`);
+      dbQuery = dbQuery.ilike("name", `%${q}%`);
     }
 
     const { data: rows, error } = await dbQuery;
