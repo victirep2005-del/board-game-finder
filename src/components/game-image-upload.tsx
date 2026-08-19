@@ -32,14 +32,13 @@ export function GameImageUpload({ gameId, value, onChange }: GameImageUploadProp
     setError(null);
     try {
       const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
-      const path = `${gameId}.${extension}`;
-
-      // Reemplaza la imagen existente cuando el juego ya tiene una foto.
-      // Esto evita el error "The resource already exists" al editarla.
+      // Use a new object path on every replacement so the upload only needs
+      // the existing INSERT policy; it never requires a storage UPDATE.
+      const path = `${gameId}-${crypto.randomUUID()}.${extension}`;
       const { error: uploadError } = await supabase.storage
         .from("board-game-images")
         .upload(path, file, {
-          upsert: true,
+          upsert: false,
           contentType: file.type,
           cacheControl: "3600",
         });
