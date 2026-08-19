@@ -33,10 +33,18 @@ export function GameImageUpload({ gameId, value, onChange }: GameImageUploadProp
     try {
       const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
       const path = `${gameId}.${extension}`;
+
+      // Reemplaza la imagen existente cuando el juego ya tiene una foto.
+      // Esto evita el error "The resource already exists" al editarla.
       const { error: uploadError } = await supabase.storage
         .from("board-game-images")
-        .upload(path, file, { upsert: false, contentType: file.type, cacheControl: "3600" });
+        .upload(path, file, {
+          upsert: true,
+          contentType: file.type,
+          cacheControl: "3600",
+        });
       if (uploadError) throw uploadError;
+
       const { data } = supabase.storage.from("board-game-images").getPublicUrl(path);
       const url = `${data.publicUrl}?v=${Date.now()}`;
       onChange(url);
